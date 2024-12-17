@@ -6,8 +6,21 @@ import edu.tufts.hrilab.vla.gui.VLAAdapter;
 import edu.tufts.hrilab.vla.util.Util;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class VLAComponent extends DiarcComponent implements GuiProvider {
+    // Class-level fields to store beliefs
+    private Map<String, String> symbolicBeliefs;
+    private Map<String, String> actionBeliefs;
+
+    public VLAComponent() {
+        this.symbolicBeliefs = new HashMap<>();
+        this.actionBeliefs = new HashMap<>();
+    }
+
     //==========================================================================
     // Implement methods | GuiProvider
     //==========================================================================
@@ -20,45 +33,53 @@ public class VLAComponent extends DiarcComponent implements GuiProvider {
     }
 
     /**
-     * Returns True is beliefs were sucessfully updated and False otherwise
-    */
+     * Returns True if beliefs were successfully updated and False otherwise
+     */
     public boolean updateBeliefs(ArrayList<Integer> objectRelations, ArrayList<Integer> actionStates) {
         if (objectRelations == null || actionStates == null) {
             return false;
         }
 
-        String[] symbolicStates = Util.getSymbolicStates();
-        Map<String, Integer> symbolicStateMap = new HashMap<>();
-        for (int i = 0; i < objectRelations.size(); i++) {
-            Integer relation = objectRelations.get(i);
-            String state = symbolicStates.get(i);
-            symbolicStateMap.put(state, relation);
+        try {
+            // Update symbolic states
+            String[] symbolicStates = Util.getSymbolicStates();
+            Map<String, Integer> symbolicStateMap = new HashMap<>();
+            for (int i = 0; i < objectRelations.size() && i < symbolicStates.length; i++) {
+                Integer relation = objectRelations.get(i);
+                String state = symbolicStates[i];
+                symbolicStateMap.put(state, relation);
+            }
+
+            // Update action states
+            String[] actionStateArray = Util.getActionStates();
+            Map<String, Integer> actionStateMap = new HashMap<>();
+            for (int j = 0; j < actionStates.size() && j < actionStateArray.length; j++) {
+                Integer state = actionStates.get(j);
+                String stateString = actionStateArray[j];
+                actionStateMap.put(stateString, state);
+            }
+
+            // Update belief maps
+            this.symbolicBeliefs = Util.reformatInputData(symbolicStateMap);
+            this.actionBeliefs = Util.reformatInputData(actionStateMap);
+
+            return true;
+        } catch (Exception e) {
+            // Log error or handle appropriately
+            return false;
         }
-
-        String[] actionStates = Util.getActionStates();
-        Map<String, Integer> actionStateMap = new HashMap<>();
-        for (int j = 0; j < actionStates.size(); j++) {
-            Integer state = actionStates.get(j);
-            String state = symbolicStates.get(i);
-            symbolicStateMap.put(state, relation);
-        }
-
-        Map<String, String> symbolicBeliefs = Util.reformatInputData(symbolicStateMap)
-        Map<String, String> actionBeliefs = Util.reformatInputData(actionStateMap)
-
-        return true;
     }
 
     /**
-     * Array of symbolic functions (ex. rightof(obj3, obj4)
-    */
+     * Returns an array of symbolic functions (ex. rightof(obj3, obj4))
+     */
     public List<String> retrieveSymbolicBeliefs() {
         return new ArrayList<>(symbolicBeliefs.values());
     }
 
     /**
-     * Array of action functions (ex. grasping(obj2)
-    */
+     * Returns an array of action functions (ex. grasping(obj2))
+     */
     public List<String> retrieveActionBeliefs() {
         return new ArrayList<>(actionBeliefs.values());
     }

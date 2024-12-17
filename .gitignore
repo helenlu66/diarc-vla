@@ -22,3 +22,4 @@ elevator_lab_test/
 /gui/node_modules/
 
 .DS_Store
+config/src/main/java/edu/tufts/hrilab/config/project/README.md

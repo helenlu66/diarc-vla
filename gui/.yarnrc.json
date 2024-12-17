@@ -1,0 +1,6 @@
+{
+  "resolutions": {
+    "@jridgewell/gen-mapping": "0.3.7",
+    "@babel/generator": "7.23.0"
+  }
+}

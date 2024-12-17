@@ -1,39 +1,56 @@
+package edu.tufts.hrilab.vla.util;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class Util {
 
+    /**
+     * Reformats input data by converting state strings into function notation
+     * @param inputData Map of state strings to their corresponding integer values
+     * @return Map of original strings to their function notation form
+     * @throws IllegalArgumentException if input strings are not in the expected format
+     */
     public static Map<String, String> reformatInputData(Map<String, Integer> inputData) {
+        if (inputData == null) {
+            throw new IllegalArgumentException("Input data cannot be null");
+        }
+
         Map<String, String> result = new HashMap<>();
 
-        for (String originalKey : inputData.keySet()) {
-            String[] components = originalKey.split(" ");
-            String action = components[0]; // The first word is the action
-
-            String obj1 = null;
-            String obj2 = null;
-
-            if (components.length == 2) {
-                obj1 = components[1];
-            } else if (components.length >= 3) {
-                obj1 = components[1];
-                obj2 = components[2];
-            } else {
-                throw new IllegalArgumentException("Unexpected key format: " + originalKey);
+        for (Map.Entry<String, Integer> entry : inputData.entrySet()) {
+            String originalKey = entry.getKey();
+            if (originalKey == null || originalKey.trim().isEmpty()) {
+                throw new IllegalArgumentException("Key cannot be null or empty");
             }
 
-            String funcString;
-            if (obj2 != null) {
-                funcString = String.format("%s(%s, %s)", action, obj1, obj2);
-            } else {
-                funcString = String.format("%s(%s)", action, obj1);
+            String[] components = originalKey.trim().split("\\s+");
+            if (components.length < 2) {
+                throw new IllegalArgumentException("Invalid key format - must have at least action and object: " + originalKey);
             }
 
-            result.put(originalKey, funcString);
+            String action = components[0].replace("-", "_"); // Convert hyphens to underscores for function names
+            StringBuilder funcString = new StringBuilder();
+            funcString.append(action).append("(");
+
+            // Add first object
+            funcString.append(components[1]);
+
+            // Add second object if it exists
+            if (components.length >= 3) {
+                funcString.append(", ").append(components[2]);
+            }
+
+            funcString.append(")");
+            result.put(originalKey, funcString.toString());
         }
         return result;
     }
 
+    /**
+     * Returns an array of possible action states
+     * @return String array containing all possible action states
+     */
     public static String[] getActionStates() {
         return new String[] {
             "grasped akita_black_bowl_1",
@@ -50,6 +67,11 @@ public class Util {
             "should-move-towards wooden_cabinet_1"
         };
     }
+
+    /**
+     * Returns an array of possible symbolic states representing spatial relationships
+     * @return String array containing all possible symbolic states
+     */
     public static String[] getSymbolicStates() {
         return new String[] {
             "behind akita_black_bowl_1 akita_black_bowl_2",
@@ -229,7 +251,7 @@ public class Util {
             "on-table flat_stove_1",
             "on-table glazed_rim_porcelain_ramekin_1",
             "on-table plate_1",
-            "on-table wooden_cabinet_1"
+            "on-table wooden_cabinet_1",
             "open wooden_cabinet_1_bottom_region",
             "open wooden_cabinet_1_middle_region",
             "open wooden_cabinet_1_top_region",
